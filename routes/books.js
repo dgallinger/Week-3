@@ -22,6 +22,29 @@ router.post("/", async (req, res, next) => {
   }
 });
 
+//Read - author stats
+router.get("/authors/stats", async (req, res, next) => {
+  if (req.query.authorInfo) {
+    const authorStats = await bookDAO.getAllAuthorStats();
+    res.json(authorStats);
+  } else {
+    const authorStats = await bookDAO.getAuthorStats();
+    res.json(authorStats);
+  }
+ });
+
+// Read - books based on search term
+router.get("/search", async (req, res, next) => {
+  //console.log("search terms" + req.query.query);
+  const books = await bookDAO.getByQuery(req.query.query);
+  res.json(books);
+  // if (book) {
+  //   res.json(book);
+  // } else {
+  //   res.sendStatus(404);
+  // }
+});
+
 // Read - single book
 router.get("/:id", async (req, res, next) => {
   const book = await bookDAO.getById(req.params.id);
@@ -32,13 +55,23 @@ router.get("/:id", async (req, res, next) => {
   }
 });
 
-// Read - all books
+
+
+// Read - all books - all books by certain author
 router.get("/", async (req, res, next) => {
   let { page, perPage } = req.query;
   page = page ? Number(page) : 0;
   perPage = perPage ? Number(perPage) : 10;
-  const books = await bookDAO.getAll(page, perPage);
-  res.json(books);
+  if (req.query.authorId) {
+    //console.log(req.query.authorId);
+    const books = await bookDAO.getAllByAuthor(page, perPage, req.query.authorId);
+    res.json(books);
+  } else {
+    const books = await bookDAO.getAll(page, perPage);
+    res.json(books);
+    //console.log("no id");
+  }
+  
 });
 
 // Update
